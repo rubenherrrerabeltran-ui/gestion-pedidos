@@ -1,0 +1,18 @@
+# ---- Java / Maven ----
+backend/target/
+*.class
+*.jar
+*.log
+# ---- Node / React ----
+frontend/node_modules/
+frontend/dist/
+# ---- Entorno y credenciales (nunca se versionan) ----
+.env
+*.env.local
+application-local.properties
+# ---- IDE y sistema operativo ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

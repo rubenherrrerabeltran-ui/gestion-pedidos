@@ -1,0 +1,4 @@
+# Normaliza finales de línea entre Windows y Linux
+* text=auto
+*.sh text eol=lf
+*.bat text eol=crlf
