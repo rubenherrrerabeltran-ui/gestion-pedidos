@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SGP | Gestión de Pedidos - SENA ADSO 3186691</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#172b3a;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}
+header{background:#104979;color:white;padding:21px 30px}header h1{margin:0;font-size:23px}header small{color:#c7e1f6}
+.layout{display:flex;min-height:calc(100vh - 95px)}nav{background:#15334b;min-width:190px;padding:17px}
+nav button{display:block;width:100%;text-align:left;margin:6px 0;padding:13px;color:#fff;background:transparent;border:0;border-radius:8px;cursor:pointer;font-size:15px}nav button.active,nav button:hover{background:#2774a5}
+main{flex:1;padding:25px;max-width:1250px}h2{margin-top:0}.panel{background:#fff;border:1px solid #dde5ee;border-radius:10px;padding:20px;margin-bottom:18px;overflow:auto}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px}.cards .panel strong{font-size:29px;display:block;margin-top:8px}
+table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #e3e9f0;padding:12px;text-align:left}th{background:#f0f5f8}button{cursor:pointer}button.primary{background:#086fa4;color:white;border:0;border-radius:7px;padding:10px 14px}button.secondary{background:#eef4f9;color:#14547b;border:1px solid #cee0ed;border-radius:7px;padding:7px 10px;margin:2px}button.danger{color:#a32a26}
+label{display:block;margin:12px 0 4px}input,select{padding:10px;border:1px solid #aebdca;border-radius:6px;max-width:360px;width:100%}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:15px}.toolbar input{width:270px}
+.message{background:#e7f7ed;border-left:4px solid #308255;padding:12px;margin-bottom:13px}footer{font-size:12px;color:#657687;margin:20px}
+@media(max-width:720px){.layout{display:block}nav{min-width:0;display:flex;overflow:auto}nav button{white-space:nowrap}main{padding:12px}.cards{grid-template-columns:repeat(2,1fr)}} 
+</style></head><body><header><h1>Sistema de Gestión de Pedidos</h1><small>SENA · ANALISIS Y DESARROLLO DE SOFTWARE. (3186691) · GA7-220501096-AA4-EV03</small></header><div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+/* Front-end demostrativo React. Persistencia local: no constituye una conexión MySQL. */
+(function(){'use strict';const h=React.createElement;const KEY='sena_sgp_frontend_ev03';
+const seed={usuarios:[{id:1,nombre:'Ana Martínez',correo:'ana@example.com'}],productos:[{id:1,nombre:'Teclado ergonómico',precio:89000,stock:15},{id:2,nombre:'Mouse inalámbrico',precio:49000,stock:23}],pedidos:[]};
+const read=()=>{try{return JSON.parse(localStorage.getItem(KEY))||seed}catch(_){return seed}};
+const pesos=n=>Number(n).toLocaleString('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+const B=(text,fn,cls='secondary')=>h('button',{type:'button',className:cls,onClick:fn},text);
+const Field=(label,val,fn,type='text')=>h('label',null,label,h('input',{required:true,type,value:val,onChange:e=>fn(e.target.value)}));
+function App(){const [data,setData]=React.useState(read),[tab,setTab]=React.useState('Panel'),[search,setSearch]=React.useState(''),[form,setForm]=React.useState(null),[msg,setMsg]=React.useState('');
+React.useEffect(()=>{localStorage.setItem(KEY,JSON.stringify(data))},[data]);
+const up=(key,value)=>setForm(s=>({...s,[key]:value}));
+const next=a=>a.reduce((m,x)=>Math.max(m,x.id),0)+1;
+function save(e){e.preventDefault();const collection=tab==='Usuarios'?'usuarios':'productos';let item={...form};if(collection==='productos'){item.precio=Number(item.precio);item.stock=Number(item.stock);if(item.precio<=0||!Number.isInteger(item.stock)||item.stock<0)return setMsg('Precio o existencias inválidas.');}
+if(collection==='usuarios'&&!/^\S+@\S+\.\S+$/.test(item.correo))return setMsg('Correo electrónico inválido.');
+if(collection==='usuarios'&&data.usuarios.some(x=>x.correo===item.correo&&x.id!==item.id))return setMsg('El correo ya está registrado.');
+if(!item.id)item.id=next(data[collection]);
+setData(d=>({...d,[collection]:d[collection].some(x=>x.id===item.id)?d[collection].map(x=>x.id===item.id?item:x):[...d[collection],item]}));
+setForm(null);setMsg('Registro guardado correctamente.')}
+function remove(collection,id){if(collection==='usuarios'&&data.pedidos.some(p=>p.usuarioId===id))return setMsg('No se elimina un cliente con pedidos.');
+if(collection==='productos'&&data.pedidos.some(p=>p.items.some(i=>i.productoId===id)))return setMsg('No se elimina un producto asociado a pedidos.');
+if(confirm('¿Eliminar el registro?'))setData(d=>({...d,[collection]:d[collection].filter(x=>x.id!==id)}))}
+function order(e){e.preventDefault();const u=Number(form.usuarioId),p=Number(form.productoId),q=Number(form.cantidad),product=data.productos.find(x=>x.id===p);
+if(!data.usuarios.some(x=>x.id===u)||!product||!Number.isInteger(q)||q<1||product.stock<q)return setMsg('Revisa cliente, producto y cantidad disponible.');
+setData(d=>({...d,productos:d.productos.map(x=>x.id===p?{...x,stock:x.stock-q}:x),pedidos:[...d.pedidos,{id:next(d.pedidos),usuarioId:u,estado:'Pendiente',items:[{productoId:p,cantidad:q,precio:product.precio}]}]}));
+setForm(null);setMsg('Pedido registrado. Existencias actualizadas.')}
+function changeOrder(id,estado){setData(d=>{const p=d.pedidos.find(x=>x.id===id);return {...d,pedidos:d.pedidos.map(x=>x.id===id?{...x,estado}:x),productos:estado==='Cancelado'?d.productos.map(prod=>({...prod,stock:prod.stock+p.items.filter(i=>i.productoId===prod.id).reduce((s,i)=>s+i.cantidad,0)})):d.productos}});setMsg('Estado actualizado.')}
+function table(head,rows){return h('table',null,h('thead',null,h('tr',null,...head.map(x=>h('th',{key:x},x)))),h('tbody',null,...rows))}
+let body;
+if(tab==='Panel')body=h('div',null,h('div',{className:'cards'},...[['Usuarios',data.usuarios.length],['Productos',data.productos.length],['Pedidos',data.pedidos.length],['Valor de pedidos',pesos(data.pedidos.filter(x=>x.estado!=='Cancelado').reduce((s,p)=>s+p.items.reduce((t,i)=>t+i.precio*i.cantidad,0),0))]].map(([label,n])=>h('div',{className:'panel',key:label},label,h('strong',null,n)))),h('div',{className:'panel'},'Seleccione una sección para registrar clientes, productos o pedidos. Los datos se guardan únicamente en este navegador.'));
+else if(tab==='Usuarios'||tab==='Productos'){const k=tab==='Usuarios'?'usuarios':'productos';body=h('div',null,h('div',{className:'toolbar'},h('input',{placeholder:'Buscar...',value:search,onChange:e=>setSearch(e.target.value)}),B('Nuevo registro',()=>setForm({}),'primary')),form!==null&&h('form',{className:'panel',onSubmit:save},h('h3',null,form.id?'Editar registro':'Nuevo registro'),Field('Nombre',form.nombre||'',v=>up('nombre',v)),k==='usuarios'?Field('Correo',form.correo||'',v=>up('correo',v),'email'):h('div',null,Field('Precio',form.precio??'',v=>up('precio',v),'number'),Field('Existencias',form.stock??'',v=>up('stock',v),'number')),h('p',null,h('button',{className:'primary',type:'submit'},'Guardar'),' ',B('Cancelar',()=>setForm(null)))),
+h('div',{className:'panel'},table(k==='usuarios'?['ID','Nombre','Correo','Acciones']:['ID','Nombre','Precio','Existencias','Acciones'],data[k].filter(x=>x.nombre.toLowerCase().includes(search.toLowerCase())).map(x=>h('tr',{key:x.id},h('td',null,x.id),h('td',null,x.nombre),h('td',null,k==='usuarios'?x.correo:pesos(x.precio)),...(k==='productos'?[h('td',{key:'stock'},x.stock)]:[]),h('td',null,B('Editar',()=>setForm({...x})),' ',B('Eliminar',()=>remove(k,x.id),'secondary danger')))))));
+}else{body=h('div',null,B('Nuevo pedido',()=>setForm({usuarioId:'',productoId:'',cantidad:1}),'primary'),form!==null&&h('form',{className:'panel',onSubmit:order},h('h3',null,'Registrar pedido'),h('label',null,'Cliente',h('select',{required:true,value:form.usuarioId,onChange:e=>up('usuarioId',e.target.value)},h('option',{value:''},'Seleccione'),...data.usuarios.map(x=>h('option',{key:x.id,value:x.id},x.nombre)))),h('label',null,'Producto',h('select',{required:true,value:form.productoId,onChange:e=>up('productoId',e.target.value)},h('option',{value:''},'Seleccione'),...data.productos.map(x=>h('option',{key:x.id,value:x.id},x.nombre+' · '+pesos(x.precio)+' · Stock: '+x.stock)))),Field('Cantidad',form.cantidad,v=>up('cantidad',v),'number'),h('p',null,h('button',{type:'submit',className:'primary'},'Guardar pedido'),' ',B('Cancelar',()=>setForm(null)))),h('div',{className:'panel'},table(['Pedido','Cliente','Detalle','Total','Estado','Acciones'],data.pedidos.map(p=>h('tr',{key:p.id},h('td',null,p.id),h('td',null,data.usuarios.find(u=>u.id===p.usuarioId)?.nombre||'Sin nombre'),h('td',null,p.items.map(i=>(data.productos.find(x=>x.id===i.productoId)?.nombre||'Producto')+' × '+i.cantidad).join(', ')),h('td',null,pesos(p.items.reduce((s,i)=>s+i.cantidad*i.precio,0))),h('td',null,p.estado),h('td',null,p.estado==='Pendiente'?h('span',null,B('Entregar',()=>changeOrder(p.id,'Entregado')),' ',B('Cancelar',()=>changeOrder(p.id,'Cancelado'),'secondary danger')):'—'))))));}
+return h('div',{className:'layout'},h('nav',null,...['Panel','Usuarios','Productos','Pedidos'].map(x=>B(x,()=>{setTab(x);setSearch('');setForm(null);setMsg('')},x===tab?'active':''))),h('main',null,h('h2',null,tab),msg&&h('div',{className:'message',role:'status'},msg,' ',B('Cerrar',()=>setMsg(''))),body,h('footer',null,'Prototipo académico · React · almacenamiento local · No conectado a MySQL')));}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+})();
+</script></body></html>
