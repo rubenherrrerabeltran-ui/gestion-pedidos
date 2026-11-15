@@ -1,0 +1,7 @@
+Evidencia GA7-220501096-AA4-EV03
+Aprendiz: Rubén Darío Herrera Beltrán
+Programa: ANALISIS Y DESARROLLO DE SOFTWARE. (3186691)
+Repositorio: https://github.com/rubenherrrerabeltran-ui/gestion-pedidos
+Módulo React: https://github.com/rubenherrrerabeltran-ui/gestion-pedidos/tree/main/frontend/GA7-AA4-EV03
+Archivo de inicio: frontend/GA7-AA4-EV03/index.html
+Nota: el módulo usa React 18 por CDN, almacena datos de demostración en localStorage y requiere conexión a internet para cargar las bibliotecas React.
