@@ -1,0 +1,20 @@
+### Verificar salud
+GET http://localhost:3000/api/salud
+
+### Registro correcto (201)
+POST http://localhost:3000/api/registro
+Content-Type: application/json
+
+{"usuario":"aprendiz01","contrasena":"Clave-SENA-2026!"}
+
+### Login correcto (200)
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{"usuario":"aprendiz01","contrasena":"Clave-SENA-2026!"}
+
+### Login con contraseña errónea (401)
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{"usuario":"aprendiz01","contrasena":"Clave-Equivocada-2026"}
