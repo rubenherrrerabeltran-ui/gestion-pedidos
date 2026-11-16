@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API de Autenticación | SENA ADSO 3186691</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#183143;background:#eef3f7}*{box-sizing:border-box}body{margin:0}
+header{background:#145078;color:white;padding:22px 7%}header h1{margin:0 0 7px;font-size:24px}header small{color:#cde8f7}
+main{max-width:1000px;margin:30px auto;padding:0 22px}.grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:20px}
+.card{background:white;border:1px solid #d8e2ec;border-radius:12px;padding:25px;box-shadow:0 4px 12px #17314c0d}
+h2{margin:0 0 18px;font-size:21px}label{display:block;margin:15px 0 6px;font-weight:bold}
+input{width:100%;padding:12px;border-radius:7px;border:1px solid #adc1d2;font-size:16px}
+button{margin-top:18px;padding:12px 19px;border:0;border-radius:7px;background:#087ca3;color:white;font-size:15px;cursor:pointer}
+button:hover{background:#075d7e}.result{margin-top:16px;min-height:50px;padding:12px;border-radius:6px;background:#f0f5f9;white-space:pre-wrap}
+.ok{background:#e2f5e9;color:#0c5935}.error{background:#fff0ef;color:#9b2724}
+footer{padding:23px 0;color:#526879;font-size:13px}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Servicio web de registro e inicio de sesión</h1>
+<small>SENA · ANALISIS Y DESARROLLO DE SOFTWARE. (3186691) · GA7-220501096-AA5-EV01</small></header>
+<main><div class="grid">
+<section class="card"><h2>1. Registro de usuario</h2><form id="register">
+<label for="ruser">Usuario</label><input id="ruser" autocomplete="username" required minlength="3" maxlength="30" placeholder="Ejemplo: aprendiz01">
+<label for="rpass">Contraseña</label><input id="rpass" type="password" autocomplete="new-password" required minlength="8" maxlength="72" placeholder="Mínimo 8 caracteres">
+<button>Registrar usuario</button></form><div id="rresult" class="result" role="status" aria-live="polite">Esperando registro...</div></section>
+<section class="card"><h2>2. Inicio de sesión</h2><form id="login">
+<label for="luser">Usuario</label><input id="luser" autocomplete="username" required minlength="3" maxlength="30" placeholder="Usuario registrado">
+<label for="lpass">Contraseña</label><input id="lpass" type="password" autocomplete="current-password" required minlength="8" maxlength="72">
+<button>Iniciar sesión</button></form><div id="lresult" class="result" role="status" aria-live="polite">Esperando autenticación...</div></section>
+</div><footer>Demostración académica local. No utilice contraseñas personales. Para producción se necesitan HTTPS, control de intentos y sesiones seguras.</footer></main>
+<script>
+/* Formularios conectados mediante fetch() con las rutas reales del servidor. */
+function bind(formId,route,resultId,userId,passId){
+ document.getElementById(formId).addEventListener('submit',async event=>{
+  event.preventDefault();const output=document.getElementById(resultId);
+  const data={usuario:document.getElementById(userId).value,contrasena:document.getElementById(passId).value};
+  try{
+   const response=await fetch(route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+   const json=await response.json();
+   output.textContent='HTTP '+response.status+' — '+json.mensaje;
+   output.className='result '+(response.ok?'ok':'error');
+  }catch(error){
+   output.textContent='No se pudo conectar con el servidor local';output.className='result error';
+  }
+ });
+}
+bind('register','/api/registro','rresult','ruser','rpass');
+bind('login','/api/login','lresult','luser','lpass');
+</script></body></html>
